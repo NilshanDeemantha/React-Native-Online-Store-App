@@ -12,6 +12,8 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
+import { setLocalStorageItem } from '../utils/localeStorage';
+
 const loginImg = require('../../assets/images/login.jpg');
 
 const Home = () => {
@@ -66,9 +68,13 @@ const Home = () => {
       }
       const data = await response.json();
       let userFound = false;
-      data.forEach((user) => {
+      data.forEach( async (user) => {
         if (!userFound &&user.email === email) {
           if (user.password === password) {
+            // Save user's first name and last name in local storage
+            await setLocalStorageItem('firstName', user.name.firstname);
+            await setLocalStorageItem('lastName', user.name.lastname);
+            await setLocalStorageItem('userId', user.id);
             navigation.navigate('Products');
             userFound = true;
             return;
