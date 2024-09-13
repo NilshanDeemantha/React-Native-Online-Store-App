@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, Image, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 import Header from '../components/Header';
 import { useNavigation } from '@react-navigation/native';
 
@@ -7,12 +8,14 @@ const productImg =  require('../../assets/images/product.jpeg')
 
 const Products = () => {
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState('All');
   const navigation = useNavigation();
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch('https://api.escuelajs.co/api/v1/products');
+        const response = await fetch('https://fakestoreapi.com/products');
         const data = await response.json();
         setProducts(data);
       } catch (error) {
@@ -23,27 +26,61 @@ const Products = () => {
     fetchProducts();
   }, []);
 
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch('https://fakestoreapi.com/products/categories');
+        const data = await response.json();
+        setCategories(data);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+  console.log('selectedCategory', selectedCategory)
+
+  const filteredProducts = useMemo(() => {
+    if (selectedCategory === 'All') {
+      return products;
+    }
+    return products.filter((product) => product.category === selectedCategory);
+  },[ selectedCategory, products]);
+
   const renderItem = ({ item }) => (
     <View style={styles.productContainer}>
       <TouchableOpacity onPress={() => navigation.navigate('SingleProduct', { product: item })}>
         <Image
-          source={{ uri: item.images[0] }}
+          source={{ uri: item.image }}
           style={styles.productImage}
-          defaultSource={productImg} // Ensure this is a valid local image
         />
       </TouchableOpacity>
       <Text style={styles.productTitle}>{item.title}</Text>
-      <Text style={styles.productPrice}>${item.price}</Text>
+      <Text style={styles.productCategory}>{item.category.toUpperCase()}</Text>
+      <Text style={styles.productPrice}>{item.price} $</Text>
       <Text style={styles.productDescription}>{item.description}</Text>
-      <Text style={styles.productCategory}>{item.category.name}</Text>
     </View>
   );
 
   return (
     <View style={styles.container}>
       <Header title="Products" />
+      <View style={styles.filterContainer}>
+        <Text style={styles.filterLabel}>Filter by Category:</Text>
+        <Picker
+          selectedValue={selectedCategory}
+          style={styles.picker}
+          onValueChange={(itemValue) => setSelectedCategory(itemValue)}
+        >
+          <Picker.Item label="All" value="All" />
+          {categories.map((category, index) => (
+            <Picker.Item key={index} label={category} value={category} />
+          ))}
+        </Picker>
+      </View>
       <FlatList
-        data={products}
+        data={filteredProducts}
         renderItem={renderItem}
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.list}
@@ -56,13 +93,31 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  filterContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingBottom: 10,
+    backgroundColor: '#f8f8f8',
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+    height: 40,
+  },
+  filterLabel: {
+    fontSize: 16,
+    marginRight: 10,
+  },
+  picker: {
+    flex: 1,
+    height: 50,
+  },
   list: {
     padding: 10,
   },
   productContainer: {
     backgroundColor: '#fff',
     padding: 10,
-    marginBottom: 10,
+    marginBottom: 20,
     borderRadius: 5,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -74,6 +129,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 200,
     borderRadius: 5,
+    resizeMode: 'contain',
   },
   productTitle: {
     fontSize: 18,
@@ -82,6 +138,7 @@ const styles = StyleSheet.create({
   },
   productPrice: {
     fontSize: 16,
+    fontWeight: 'bold',
     color: '#888',
     marginTop: 5,
   },
@@ -94,6 +151,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     marginTop: 5,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 10,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    width: 'auto',
   },
 });
 

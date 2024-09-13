@@ -54,7 +54,7 @@ const Home = () => {
     }
     setLoading(true);
     try {
-      const response = await fetch(`https://api.escuelajs.co/api/v1/users?email=${email}&password=${password}`, {
+      const response = await fetch('https://fakestoreapi.com/users', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

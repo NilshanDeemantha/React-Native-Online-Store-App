@@ -1,11 +1,7 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet, FlatList } from 'react-native';
+import { View, Text, Image, StyleSheet, ScrollView } from 'react-native';
 import { useRoute } from '@react-navigation/native';
-import Swiper from 'react-native-swiper';
 import Header from '../components/Header';
-
-const productImg =  require('../../assets/images/product.jpeg')
-
 
 const SingleProduct = () => {
   const route = useRoute();
@@ -15,18 +11,15 @@ const SingleProduct = () => {
     <>
       <Header title="Product Details" />
       <View style={styles.container}>
-        <Swiper style={styles.wrapper} showsButtons={true} dotColor="#ccc" activeDotColor="#000">
-          {product.images.map((image, index) => (
-            <Image key={index} source={productImg} style={styles.image} />
-          ))}
-        </Swiper>
-        <Text style={styles.title}>{product.title}</Text>
-        <Text style={styles.price}>${product.price}</Text>
-        <Text style={styles.description}>{product.description}</Text>
-        <View style={styles.categoryContainer}>
-          <Image source={{ uri: product.category.image }} style={styles.categoryImage} />
-          <Text style={styles.categoryName}>{product.category.name}</Text>
-        </View>
+        <Image source={{ uri: product.image}} style={styles.image} />
+        <ScrollView>
+          <Text style={styles.title}>{product.title}</Text>
+          <View style={styles.categoryContainer}>
+            <Text style={styles.categoryName}>{product.category.toUpperCase()}</Text>
+          </View>
+          <Text style={styles.price}>{product.price} $</Text>
+          <Text style={styles.description}>{product.description}</Text>
+        </ScrollView>
       </View>
     </>
   );
@@ -45,6 +38,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 300,
     borderRadius: 10,
+    resizeMode: 'contain',
   },
   title: {
     fontSize: 24,
@@ -65,19 +59,17 @@ const styles = StyleSheet.create({
     marginVertical: 5,
   },
   categoryContainer: {
-    flexDirection: 'row',
+    marginTop: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 10,
     alignItems: 'center',
-    marginTop: 20,
-  },
-  categoryImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    marginRight: 10,
   },
   categoryName: {
     fontSize: 18,
-    color: '#666',
+    fontWeight: 'bold',
+    color: '#333',
   },
 });
 
